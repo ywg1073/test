@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<link rel="stylesheet" href="katex/katex.min.css">
+<script src="katex/katex.min.js"></script>
+<script src="katex/auto-render.min.js"></script>
+<style>
+:root {
+  --bg:#0f0f1a;
+  --surface:#1a1a2e;
+  --card:#1e1e32;
+  --card-hover:#262640;
+  --stroke:rgba(255,255,255,.06);
+  --accent:#e94560;
+  --accent-2:#7c4dff;
+  --blue:#4fc3f7;
+  --green:#4ade80;
+  --amber:#fbbf24;
+  --red:#ef4444;
+  --text:#f0f0f5;
+  --text-2:#a0a0b8;
+  --text-3:#6b6b85;
+  --radius:16px;
+  --shadow:0 2px 12px rgba(0,0,0,.3);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --ease-bounce:cubic-bezier(.34,1.56,.64,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);color:var(--text);min-height:100vh;font-family:-apple-system,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+body::-webkit-scrollbar{display:none;}
+#app{position:relative;min-height:100vh;min-height:100dvh;padding-bottom:calc(84px + env(safe-area-inset-bottom));}
+.page{position:relative;animation:pageIn .08s ease both;}
+@keyframes pageIn{from{opacity:0}to{opacity:1}}
+
+/* ===== 顶栏 ===== */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(15,15,26,.98);border-bottom:1px solid var(--stroke);padding:14px 16px 12px;display:flex;align-items:center;gap:10px;}
+.brand{flex:1;min-width:0;}
+.brand h1{font-size:18px;line-height:1.25;font-weight:800;color:var(--text);letter-spacing:0;}
+.brand .sub{font-size:12px;color:var(--text-3);margin-top:3px;}
+.icon-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--stroke);background:var(--card);color:var(--accent);font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .12s var(--ease),transform .12s var(--ease);}
+.icon-btn:active{transform:scale(.92);background:var(--card-hover);}
+
+/* ===== 首页内容 ===== */
+.content{padding:16px 16px 12px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+.stat-card{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow);min-height:126px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;animation:cardIn .14s var(--ease) both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.stat-card:active,.panel:active,.chapter-card:active{transform:scale(.98);background:var(--card-hover);}
+.stat-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:10px;}
+.stat-icon.green{background:rgba(74,222,128,.12);color:var(--green)}
+.stat-icon.blue{background:rgba(79,195,247,.12);color:var(--blue)}
+.stat-icon.amber{background:rgba(251,191,36,.12);color:var(--amber)}
+.stat-icon.rose{background:rgba(233,69,96,.12);color:var(--accent)}
+.stat-label{font-size:12px;color:var(--text-3);margin-bottom:5px;}
+.stat-value{font-size:24px;font-weight:800;color:var(--text);line-height:1.2;transition:opacity .25s ease,transform .25s ease;}
+.stat-value.fresh{opacity:.5;transform:scale(.92);}
+.card-tip{font-size:11px;color:var(--text-3);margin-top:8px;}
+.panel{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:20px 18px;margin-bottom:16px;box-shadow:var(--shadow);transition:background .12s var(--ease),transform .12s var(--ease);}
+.panel-in{animation:panelIn .2s var(--ease) both;animation-delay:.05s;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.eyebrow{font-size:12px;color:var(--accent);font-weight:700;margin-bottom:4px;}
+.panel-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.35;}
+.panel-sub{font-size:12px;color:var(--text-3);line-height:1.6;margin-top:4px;}
+.pill{font-size:12px;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:999px;padding:6px 12px;font-weight:700;white-space:nowrap;}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.quick-btn{border:1px solid var(--stroke);border-radius:14px;background:rgba(255,255,255,.03);padding:14px 12px;color:var(--text-2);font-size:13px;text-align:left;cursor:pointer;}
+.quick-btn strong{display:block;color:var(--text);font-size:15px;margin-bottom:4px;}
+.category-list,.chapter-list{display:flex;flex-direction:column;gap:12px;}
+.category-card,.chapter-card{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);transition:background .12s var(--ease),transform .12s var(--ease);position:relative;animation:cardPop .14s var(--ease) both;}
+@keyframes cardPop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.category-card:before,.chapter-card:before{content:"";position:absolute;left:0;top:20px;bottom:20px;width:4px;border-radius:2px;background:linear-gradient(180deg,var(--accent),var(--accent-2));}
+.category-main,.chapter-main{padding-left:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.category-name,.chapter-name{font-size:16px;font-weight:800;color:var(--text);line-height:1.3;}
+.category-desc,.chapter-count{font-size:12px;color:var(--text-3);margin-top:8px;}
+.chapter-preview{font-size:15px;color:var(--text-2);line-height:1.85;margin-top:8px;word-break:break-word;opacity:.35;transition:opacity .18s ease;will-change:opacity;}
+.chapter-preview.rendered{opacity:1;}
+.chapter-preview .katex{font-size:1.02em;line-height:1.5;}
+.preview-options{margin-top:8px;border-top:1px solid var(--stroke);padding-top:6px;}
+.chapter-preview .katex-display{margin:10px 0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}
+.chapter-preview .katex-display>.katex{overflow-x:auto;overflow-y:hidden;}
+.preview-option{display:flex;gap:8px;padding:4px 0;font-size:14px;color:var(--text-2);}
+.preview-option .olabel{width:22px;height:22px;border-radius:6px;background:rgba(233,69,96,.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.arrow{color:var(--text-3);font-size:18px;}
+.chapter-arrow{font-size:16px;color:var(--text-3);flex-shrink:0;margin-left:8px;}
+
+/* ===== 空状态 ===== */
+.empty{text-align:center;padding:92px 28px;color:var(--text-3);}
+.empty-emoji{font-size:54px;opacity:.42;margin-bottom:16px;}
+.empty-title{font-size:16px;color:var(--text-2);font-weight:700;margin-bottom:6px;}
+.empty-text{font-size:15px;color:var(--text-2);font-weight:500;line-height:1.8;margin-bottom:6px;}
+.empty-sub{font-size:13px;line-height:1.7;color:var(--text-3);margin-top:4px;}
+
+/* ===== 底部 Tab 栏 ===== */
+.tabbar{position:fixed;left:0;right:0;bottom:0;height:calc(68px + env(safe-area-inset-bottom));background:rgba(15,15,26,.98);border-top:1px solid var(--stroke);display:grid;grid-template-columns:repeat(4,1fr);z-index:80;padding-bottom:calc(4px + env(safe-area-inset-bottom));}
+.tab{border:0;background:transparent;color:var(--text-3);font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border-radius:14px 14px 0 0;transition:color .12s var(--ease),background .12s var(--ease),transform .12s var(--ease);}
+.tab .ico{font-size:19px;line-height:1;}
+.tab.active{color:var(--accent);background:rgba(233,69,96,.08);font-weight:700;}
+.tab:active{transform:scale(.94);}
+
+/* ===== 抽屉（题库分类） ===== */
+body.drawer-open{overflow:hidden;overscroll-behavior:none;}
+.drawer-mask{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:120;display:flex;align-items:flex-end;animation:fadeIn .12s ease both;will-change:opacity;overscroll-behavior:contain;touch-action:none;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.drawer{width:100%;max-height:72vh;background:var(--surface);border-radius:18px 18px 0 0;border:1px solid var(--stroke);box-shadow:0 -10px 40px rgba(0,0,0,.42);padding:18px 16px 24px;overflow:auto;animation:drawerIn .18s var(--ease) both;will-change:transform;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;contain:layout paint style;}
+@keyframes drawerIn{from{transform:translate3d(0,100%,0)}to{transform:translate3d(0,0,0)}}
+.drawer-handle{width:42px;height:4px;border-radius:99px;background:var(--text-3);opacity:.45;margin:0 auto 16px;}
+.drawer-title{font-size:18px;font-weight:800;margin-bottom:4px;}
+.drawer-sub{font-size:12px;color:var(--text-3);margin-bottom:16px;}
+.drawer-back{font-size:13px;color:var(--blue);padding:8px 0 12px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:4px;}
+/* 抽屉顶栏统一：← + 标题 + ⌂ */
+.drawer-topbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.drawer-back-btn,.drawer-home-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--stroke);background:var(--card);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s var(--ease),transform .12s var(--ease);}
+.drawer-back-btn{color:var(--accent);}.drawer-back-btn:active,.drawer-home-btn:active{transform:scale(.92);background:var(--card-hover);}
+.drawer-home-btn{color:var(--text-3);}
+.drawer-topbar-title{flex:1;font-size:17px;font-weight:800;color:var(--text);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ===== 收藏列表 ===== */
+.list{padding:4px 16px 20px;}
+.fav-card{background:var(--card);border-radius:var(--radius);padding:26px 22px 22px 22px;margin-bottom:16px;cursor:pointer;transition:background .12s var(--ease),transform .12s var(--ease);border:1px solid var(--stroke);position:relative;box-shadow:var(--shadow);animation:cardIn .12s var(--ease) both;}
+.category-card,.chapter-card,.fav-card{content-visibility:auto;contain-intrinsic-size:auto 180px}
+.fav-card:active{transform:scale(.97);background:var(--card-hover);}
+.card-bar{position:absolute;left:0;top:20px;bottom:20px;width:4px;border-radius:2px;}
+.card-bar.cat-收藏{background:var(--accent);}
+.card-bar.cat-不熟练{background:var(--amber);}
+.card-bar.cat-完全不会{background:var(--red);}
+.card-bar.cat-掌握{background:var(--green);}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-left:12px;}
+.card-tag{font-size:12px;font-weight:600;padding:4px 12px;border-radius:8px;}
+.card-tag.cat-收藏{background:rgba(233,69,96,0.12);color:var(--accent);}
+.card-tag.cat-不熟练{background:rgba(251,191,36,0.12);color:var(--amber);}
+.card-tag.cat-完全不会{background:rgba(239,68,68,0.12);color:var(--red);}
+.card-tag.cat-掌握{background:rgba(74,222,128,0.12);color:var(--green);}
+.card-src{font-size:11px;color:var(--text-3);}
+.card-preview{padding-left:12px;font-size:15px;line-height:1.85;color:var(--text-2);word-break:break-word;max-width:100%;opacity:0;transition:opacity .18s ease;}
+.card-preview.rendered{opacity:1;}
+.card-preview p{margin-bottom:10px;}
+.card-preview p:last-child{margin-bottom:0;}
+.card-preview .katex-display{margin:10px 0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}
+.card-preview .katex-display>.katex{overflow-x:auto;overflow-y:hidden;}
+.card-preview .katex{font-size:1.02em;line-height:1.5;}
+
+/* ===== 分类筛选按钮和抽屉 ===== */
+.filter-trigger{display:flex;align-items:center;justify-content:center;gap:6px;width:calc(100% - 32px);margin:8px 16px;padding:10px 16px;border:1px solid var(--stroke);border-radius:12px;background:var(--card);color:var(--text-2);font-size:14px;font-weight:600;cursor:pointer;transition:background .12s var(--ease),transform .12s var(--ease);}
+.filter-trigger:active{transform:scale(.97);background:var(--card-hover);}
+.filter-trigger .arrow-down{font-size:10px;color:var(--text-3);}
+.filter-list{padding:4px 0 8px;}
+.filter-item{display:flex;align-items:center;gap:10px;width:100%;padding:12px 4px;border:0;background:transparent;color:var(--text-2);font-size:14px;text-align:left;cursor:pointer;border-radius:10px;transition:background .1s var(--ease),color .1s var(--ease);}
+.filter-item:active{background:var(--card-hover);}
+.filter-item.active{color:var(--accent);font-weight:600;}
+.filter-check{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;border:2px solid var(--stroke);font-size:13px;font-weight:700;flex-shrink:0;}
+.filter-item.active .filter-check{border-color:var(--accent);background:var(--accent);color:#fff;}
+
+/* ===== 收藏详情页 ===== */
+.detail-body{padding:12px 16px 20px;}
+.detail-head{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.detail-badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:8px;}
+.detail-badge.cat-收藏{background:rgba(233,69,96,0.12);color:var(--accent);}
+.detail-badge.cat-不熟练{background:rgba(251,191,36,0.12);color:var(--amber);}
+.detail-badge.cat-完全不会{background:rgba(239,68,68,0.12);color:var(--red);}
+.detail-badge.cat-掌握{background:rgba(74,222,128,0.12);color:var(--green);}
+.detail-meta{font-size:12px;color:var(--text-3);}
+.block{background:var(--card);border-radius:var(--radius);padding:24px 20px;margin-bottom:14px;box-shadow:var(--shadow);border:1px solid var(--stroke);}
+.block-title{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.block-title.stem{color:var(--accent);}
+.block-title.answer{color:var(--green);}
+.block-title.solution{color:var(--blue);}
+.block-content{font-size:15px;line-height:1.85;color:var(--text-2);word-break:break-word;max-width:100%;overflow-x:hidden;}
+.block-content p{margin-bottom:10px;}
+.block-content p:last-child{margin-bottom:0;}
+.block-content ul{margin:8px 0 8px 4px;list-style:none;}
+.block-content ul li{margin-bottom:6px;padding-left:8px;}
+.block-content strong{color:var(--text);font-weight:600;}
+.block-content .katex-display{margin:14px 0;padding:8px 4px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}
+.block-content .katex{font-size:1.05em;line-height:1.5;overflow-wrap:break-word;}
+.block-content .katex-display>.katex{white-space:nowrap;overflow-x:auto;overflow-y:hidden;}
+.block-content p strong:first-child{display:inline-block;min-width:20px;}
+/* 选项区域 */
+.block-options{margin-top:14px;padding-top:12px;border-top:1px solid var(--stroke);font-size:15px;line-height:1.85;color:var(--text-2);overflow:hidden;}
+.block-options p{margin-bottom:8px;}
+.block-options p:last-child{margin-bottom:0;}
+.block-options strong{color:var(--text);font-weight:600;}
+.block-options .katex-display{display:block;width:max-content;min-width:0;max-width:none;margin:5px 0 2px;overflow:visible;padding:1px 0;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;}
+.block-options .katex-display>.katex{max-width:none;overflow:visible;}
+.block-options .katex-html{white-space:nowrap;}
+/* 选项交互 */
+.option-item{display:flex;padding:12px 14px;margin-bottom:10px;border-radius:12px;background:var(--card);border:1px solid var(--stroke);cursor:pointer;transition:all .2s var(--ease);overflow:hidden;}
+.option-item:active{transform:scale(0.98);}
+.option-item .opt-label{width:28px;font-weight:bold;color:var(--text-2);}
+.option-item .opt-text{flex:1;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;padding:0 8px 4px 0;margin-right:-6px;line-height:1.58;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;}
+.option-item .opt-text::-webkit-scrollbar{height:3px}
+.option-item .opt-text::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:99px}
+.option-item .opt-text .katex{font-size:1em;line-height:1.5}
+.option-item .opt-text .katex-html{white-space:nowrap}
+.option-item .opt-text .katex-display{display:block;width:max-content;min-width:0;max-width:none;margin:4px 0 2px;padding:1px 0;overflow:visible}
+.option-item .opt-text .katex-display>.katex{max-width:none;overflow:visible}
+.option-item.correct{background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.4);}
+.option-item.correct .opt-label,.option-item.correct .opt-text{color:var(--green);}
+.option-item.wrong{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.4);}
+@keyframes pageCardEnter {
+  0% { opacity: 0.2; transform: translateY(10px) scale(0.988); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.page-card-enter {
+  animation: pageCardEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.option-item.wrong .opt-label,.option-item.wrong .opt-text{color:var(--red);}
+/* 展开按钮 */
+.toggle{width:100%;padding:16px;border-radius:14px;border:1px solid var(--stroke);background:var(--card);color:var(--text-2);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:14px;transition:background .12s var(--ease),border-color .12s var(--ease),color .12s var(--ease),transform .12s var(--ease);display:flex;align-items:center;justify-content:center;gap:8px;-webkit-user-select:none;user-select:none;position:relative;overflow:hidden;}
+.toggle:active{background:var(--card-hover);transform:scale(0.98);}
+.toggle.open{color:var(--blue);border-color:rgba(79,195,247,0.25);background:rgba(79,195,247,0.06);}
+.toggle .arrow{font-size:12px;transition:transform .16s var(--ease);}
+.toggle.open .arrow{transform:rotate(180deg);}
+/* 折叠区域 */
+.collapsible{max-height:0;overflow:hidden;transition:max-height .22s var(--ease),opacity .16s var(--ease),margin .22s var(--ease);opacity:0;margin-top:0;}
+.collapsible.open{max-height:5000px;opacity:1;margin-top:0;}
+.collapsible .block{margin-top:0;margin-bottom:14px;}
+.collapsible .block-content{transition:opacity .15s ease;}
+
+/* ===== 交互按钮（收藏详情页） ===== */
+.fav-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.fav-action{min-height:44px;border-radius:14px;border:1px solid var(--stroke);background:rgba(255,255,255,.035);color:var(--text-2);font-size:13px;font-weight:700;padding:8px;cursor:pointer;transition:all .15s ease}
+.fav-action[data-a="fav"].on{background:linear-gradient(135deg,#e94560,#ff6b81) !important;color:#fff !important;border-color:#e94560 !important;box-shadow:0 2px 10px rgba(233,69,96,.4);font-weight:800}
+.fav-action[data-a="mastered"].on{background:rgba(74,222,128,.06);color:var(--green);border-color:var(--green);box-shadow:0 0 0 1px rgba(74,222,128,.16) inset;font-weight:800}
+.fav-action[data-a="familiar"].on{background:rgba(251,191,36,.06);color:var(--amber);border-color:var(--amber);box-shadow:0 0 0 1px rgba(251,191,36,.16) inset;font-weight:800}
+.fav-action[data-a="unknown"].on{background:rgba(239,68,68,.06);color:var(--red);border-color:var(--red);box-shadow:0 0 0 1px rgba(239,68,68,.16) inset;font-weight:800}
+.fav-action.primary{border:0;color:#fff;background:rgba(255,255,255,.05)}
+.fav-action.wide{grid-column:span 2}
+.nav-buttons{display:flex;gap:10px;margin-top:16px;justify-content:center;}
+.nav-buttons .fav-action{flex:1;max-width:160px;}
+
+/* ===== Toast ===== */
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(30,30,50,.96);border:1px solid var(--stroke);color:var(--text);border-radius:999px;padding:10px 18px;font-size:13px;z-index:200}
+
+/* ===== Modal（笔记编辑） ===== */
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center}
+.modal-box{background:var(--surface);border-radius:var(--radius);padding:24px;width:90%;max-width:400px}
+.modal-box h3{font-size:17px;margin-bottom:14px}
+.modal-box textarea{width:100%;min-height:120px;border:1px solid var(--stroke);border-radius:12px;background:var(--bg);color:var(--text);padding:12px;font-size:14px;font-family:inherit}
+.modal-box .char-count{text-align:right;font-size:12px;color:var(--text-3);margin:6px 0 12px}
+.modal-box .save-btn{width:100%;padding:12px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;font-size:15px;font-weight:800;cursor:pointer}
+
+/* ===== 下拉刷新 ===== */
+.pull-refresh{position:absolute;left:0;right:0;top:-56px;height:56px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--text-3);font-size:13px;transition:transform .3s ease;z-index:10}
+.pull-refresh .pr-spinner{width:20px;height:20px;border:2px solid var(--card);border-top-color:var(--accent);border-radius:50%;display:none}
+.pull-refresh.pulling .pr-spinner{display:block;animation:spin .8s linear infinite}
+.pull-refresh .pr-text{transition:color .2s ease}
+.pull-refresh.can-release .pr-text{color:var(--accent);font-weight:600}
+
+/* ===== 加载动画 ===== */
+.loading{text-align:center;padding:100px 20px;color:var(--text-3);}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--card);border-top-color:var(--accent);border-radius:50%;margin:0 auto 16px;animation:spin .8s linear infinite;}
+.favorites-enter{animation:favoritesEnter .28s ease both}
+@keyframes favoritesEnter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Tablet: >=768px */
+@media (min-width:768px){
+.drawer-mask{align-items:center;justify-content:center;}
+.drawer{max-width:440px;border-radius:24px;max-height:85vh;}
+.drawer-handle{display:none;}
+.content{padding:24px 32px 12px;max-width:960px;margin:0 auto}
+.stats-grid{grid-template-columns:repeat(4,1fr);gap:18px}
+.stat-card{padding:24px 20px;min-height:150px}
+.stat-value{font-size:32px}
+.stat-label{font-size:14px}
+.stat-icon{width:48px;height:48px;border-radius:14px;font-size:22px}
+.panel{padding:24px 22px}
+.panel-title{font-size:19px}
+.quick-grid{grid-template-columns:1fr 1fr;gap:16px}
+.quick-btn{padding:18px 16px;font-size:14px}
+.quick-btn strong{font-size:17px}
+.category-card,.chapter-card{padding:24px 28px}
+.category-name,.chapter-name{font-size:18px}
+.tabbar{height:calc(76px + env(safe-area-inset-bottom));padding-bottom:calc(8px + env(safe-area-inset-bottom));gap:0}
+.tab{font-size:12px;gap:6px}
+.tab .ico{font-size:22px}
+.topbar{padding:16px 24px 14px}
+.brand h1{font-size:22px}
+.brand .sub{font-size:14px}
+.icon-btn{width:44px;height:44px;border-radius:14px;font-size:19px}
+/* 收藏页 */
+.list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:960px;margin:0 auto}
+.fav-card{padding:20px}
+.detail-body{padding:20px 32px 20px;max-width:960px;margin:0 auto}
+.block{padding:28px 24px}
+.fav-actions{grid-template-columns:repeat(3,1fr);max-width:700px;gap:12px}
+.fav-action{min-height:50px;font-size:14px}
+.nav-buttons{gap:16px}
+.nav-buttons .fav-action{max-width:200px}
+.detail-head{gap:14px;margin-bottom:24px}
+.modal-box{max-width:500px;padding:28px}
+.modal-box textarea{min-height:160px;font-size:16px}
+}
+@media (min-width:1024px){
+.content{max-width:1120px}
+.stats-grid{grid-template-columns:repeat(4,1fr);gap:22px}
+.stat-card{min-height:170px;padding:28px 24px}
+.stat-value{font-size:38px}
+.quick-grid{grid-template-columns:repeat(2,1fr)}
+.list{grid-template-columns:repeat(3,minmax(0,1fr));max-width:1120px}
+.detail-body{max-width:900px}
+}
+@media (min-width:768px){
+.chapter-preview .katex{font-size:1.15em}
+.chapter-preview .katex-display{margin:14px 0}
+.katex{font-size:1.15em}
+.katex-display{margin:16px 0}
+#app{-webkit-overflow-scrolling:touch}
+}
+@media (min-width:768px) and (orientation:landscape){
+.content{padding-left:40px;padding-right:40px}
+.topbar{padding-left:max(32px,env(safe-area-inset-left));padding-right:max(32px,env(safe-area-inset-right))}
+.drawer{max-width:520px}
+}
+@media (min-width:768px) and (pointer:coarse){
+.icon-btn,.drawer-back-btn,.drawer-home-btn{min-width:48px;min-height:48px}
+.tab,.quick-btn,.filter-item,.fav-action{min-height:48px}
+.category-card,.chapter-card{touch-action:manipulation}
+}
+@media (prefers-reduced-motion: reduce){
+*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ==================== 状态管理 ====================
+const APP_STATE = {
+  tab: 'home',
+  prevTab: 'home',
+  favoritesCount: 0,
+  totalCount: 4899,
+  masteredCount: 0,
+  todayCount: 0,
+  todayPractice: 0,
+  selectedCategory: null,
+  categories: []
+};
+
+// 收藏页独立状态
+let FAVORITES_DATA = [];
+let currentFavDetail = -1;
+let isFavDetailView = false;
+let savedFavListHTML = '';
+let selectedFavPaths = [];
+let pullRefreshBoundEl = null;
+var pullState = {startY:0, pulling:false, moved:false};
+var PULL_THRESHOLD = 60;
+var renderMathTimer = null;
+var refreshListTimer = null;
+
+// ==================== 工具函数 ====================
+function b64DecodeUtf8(str){
+  const binary = atob(str);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+function b64EncodeUtf8(str){
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(function(b){binary += String.fromCharCode(b)});
+  return btoa(binary);
+}
+function decodeData() {
+  const hash = location.hash || '';
+  if (!hash.startsWith('#data=')) return;
+  try { Object.assign(APP_STATE, JSON.parse(b64DecodeUtf8(hash.substring(6))) || {}); } catch(e) {}
+}
+function esc(s){return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function callAndroid(name, arg){try{if(window.Android && typeof window.Android.logJs === 'function'){window.Android.logJs('APP_UI', name + (arg !== undefined ? ': ' + arg : ''));}if(window.Android && typeof window.Android[name] === 'function'){arg === undefined ? window.Android[name]() : window.Android[name](String(arg)); return true;}}catch(e){if(window.Android && typeof window.Android.logJs === 'function'){window.Android.logJs('APP_UI_ERR', e.message || String(e));}} return false;}
+
+// ==================== 页面导航栈 ====================
+let app_nav = [];
+let app_popReady = false;
+let _appPopGuard = 0;
+window.addEventListener('popstate', function(e){
+  if (!app_popReady || _appPopGuard > 0) { if (_appPopGuard > 0) _appPopGuard--; return; }
+  if (app_nav.length > 0) {
+    var prev = app_nav.pop();
+    if (prev.view === 'history') { setTab(APP_STATE.prevTab || 'home'); }
+    else if (prev.view === 'drawer') { drawerPopFromBack(); }
+    else if (prev.view === 'favDetail') { goBackToFavList(); }
+    else if (prev.view === 'favFilter') { closeFilterDrawerUi(); }
+  } else {
+    setTab('home');
+  }
+});
+setTimeout(function(){ app_popReady = true; history.replaceState({app_view:'base'}, ''); }, 50);
+
+function pushAppNav(view) {
+  app_nav.push(view);
+  history.pushState({app_view: typeof view === 'string' ? view : view.view}, '');
+}
+
+// ==================== 顶栏与底栏 ====================
+function topbar(title, sub, backAction) {
+  var h='<div class="topbar">';
+  if(backAction)h+='<button class="icon-btn" onclick="'+backAction+'">←</button>';
+  h+='<div class="brand"><h1>'+esc(title)+'</h1><div class="sub">'+sub+'</div></div>';
+  if(APP_STATE.tab!=='home')h+='<button class="icon-btn" onclick="setTab(\'home\')">⌂</button>';
+  return h+'</div>';
+}
+function tabbar(){
+  const tabs=[['home','⌂','首页'],['library','▦','题库'],['favorites','★','收藏'],['me','◉','我的']];
+  return '<div class="tabbar">'+tabs.map(t=>'<button class="tab '+(APP_STATE.tab===t[0]?'active':'')+'" onclick="setTab(\''+t[0]+'\')"><span class="ico">'+t[1]+'</span><span>'+t[2]+'</span></button>').join('')+'</div>';
+}
+
+// ==================== Tab 切换 ====================
+function setTab(tab){
+  // 同 tab 重复点击：收藏详情时返回列表
+  if(tab===APP_STATE.tab){
+    if(tab==='favorites' && isFavDetailView){ goBackToFavList(); }
+    return;
+  }
+  if(APP_STATE.tab!=='history')APP_STATE.prevTab=APP_STATE.tab;
+  // 离开收藏 tab 时清理状态
+  if(APP_STATE.tab==='favorites' && tab!=='favorites'){
+    isFavDetailView=false;
+    currentFavDetail=-1;
+    savedFavListHTML='';
+    selectedFavPaths=[];
+  }
+  APP_STATE.tab = tab;
+  APP_STATE.selectedCategory = null;
+  if(tab==='library'){ callAndroid('startPreCache'); }
+  if(tab==='favorites'){ loadFavoritesData(); return; }
+  setNativePullRefreshEnabled(tab==='home');
+  render();
+  if(tab==='home'){setTimeout(function(){callAndroid('requestAppData');},150);}
+}
+
+// ==================== 首页 ====================
+function renderHome(){
+  const ls=APP_STATE.lastStudy;
+  let resumeContent;
+  if(ls&&ls.has_record){
+    resumeContent='<div class="eyebrow">继续上次学习</div><div class="panel-title">'+esc(ls.category_name||'')+'</div><div class="panel-sub">'+fmtTime(ls.updated_at)+'</div>';
+  }else{
+    resumeContent='<div class="eyebrow">继续上次学习</div><div class="panel-title">暂无记录</div><div class="panel-sub">选择章节开始刷题吧</div>';
+  }
+  return topbar('大观园','') + '<div class="content">'
+    + '<div class="stats-grid">'
+    + statCard(0,'green','▣','大观总量',APP_STATE.totalCount,'')
+    + statCard(1,'blue','✓','已经掌握',APP_STATE.masteredCount,'')
+    + statCard(2,'amber','★','收藏本',APP_STATE.favoritesCount,'点击进入收藏',"setTab('favorites')")
+    + statCard(3,'rose','↗','今日完成',APP_STATE.todayCount,'')
+    + '</div>'
+    + '<div class="panel" id="resumePanel" onclick="resumeStudy()">'+resumeContent+'</div>'
+    + '<div class="panel"><div class="panel-head"><div><div class="eyebrow">学习入口</div><div class="panel-title">继续刷题</div></div><span class="pill">在线</span></div><div class="quick-grid"><button class="quick-btn" onclick="setTab(\'library\')"><strong>题库分类</strong>按章节进入练习</button><button class="quick-btn" onclick="setTab(\'favorites\')"><strong>收藏题目</strong>离线缓存复习</button></div></div>'
+    + '<div class="panel" onclick="setTab(\'history\')"><div class="eyebrow">学习回看</div><div class="panel-title">最近学习记录</div><div class="panel-sub">点击查看完整学习历史与进度</div></div>'
+    + '</div>';
+}
+function resumeStudy(){
+  const ls=APP_STATE.lastStudy;
+  if(!ls||!ls.has_record||!ls.category_id)return;
+  if(window.Android&&window.Android.openPracticeWithQuestion){
+    window.Android.openPracticeWithQuestion(String(ls.category_id),ls.question_id?String(ls.question_id):'');
+  }else if(window.Android&&window.Android.openPractice){
+    window.Android.openPractice(String(ls.category_id));
+  }else{
+    const payload={categoryId:String(ls.category_id)};
+    if(ls.question_id)payload.questionId=String(ls.question_id);
+    const data=b64EncodeUtf8(JSON.stringify(payload));
+    location.href='file:///android_asset/practice_frontend.html#data='+data;
+  }
+}
+function statCard(i,color,icon,label,value,tip,onclick){
+  return '<div class="stat-card" style="--i:'+i+'" '+(onclick?'onclick="'+onclick+'"':'')+'><div><div class="stat-icon '+color+'">'+icon+'</div><div class="stat-label">'+esc(label)+'</div><div class="stat-value">'+esc(value)+'</div></div>'+(tip?'<div class="card-tip">'+esc(tip)+'</div>':'')+'</div>';
+}
+
+// ==================== 题库分类 ====================
+function renderLibrary(){
+  if(!APP_STATE.categories || !APP_STATE.categories.length){
+    return topbar('题库分类','加载中…') + '<div class="content"><div class="empty"><div class="loading-spinner"></div><p>正在获取题库…</p></div></div>';
+  }
+  return topbar('题库分类','按真实题库层级进入练习') + '<div class="content"><div class="panel"><div class="panel-head"><div><div class="eyebrow">题库入口</div><div class="panel-title">全部分类</div><div class="panel-sub">共 '+APP_STATE.categories.length+' 个分类</div></div><span class="pill">'+APP_STATE.totalCount+' 题</span></div></div><div class="category-list">'
+    + APP_STATE.categories.map((c,i)=>categoryCard(c,i,'openCategory('+i+')')).join('')
+    + '</div></div>';
+}
+function categoryCard(c,i,action){return '<div class="category-card" style="--i:'+i+'" onclick="'+action+'"><div class="category-main"><div><div class="category-name">'+esc(c.name)+'</div><div class="category-desc">'+esc(categoryMeta(c))+'</div></div><div class="arrow">›</div></div></div>'}
+function categoryMeta(c){const childCount=(c.children||c.chapters||[]).length;const total=c.totalQuestionCount||c.questionCount||0;return childCount?('包含 '+childCount+' 个子分类'):(total?total+' 题':'点击开始学习')}
+
+function setNativePullRefreshEnabled(enabled){
+  if(setNativePullRefreshEnabled.last===enabled)return;
+  setNativePullRefreshEnabled.last=enabled;
+  callAndroid('setPullRefreshEnabled', enabled ? 'true' : 'false');
+}
+function cleanupDrawerUi(){
+  document.body.classList.remove('drawer-open');
+  setNativePullRefreshEnabled(APP_STATE.tab==='home');
+}
+function closeDrawerUiOnly(){
+  var el = document.querySelector('.drawer-mask');
+  if (el) el.remove();
+  cleanupDrawerUi();
+  APP_STATE.selectedCategory = null;
+}
+function closeDrawer() {
+  var el = document.querySelector('.drawer-mask');
+  if (el) el.remove();
+  cleanupDrawerUi();
+  APP_STATE.selectedCategory = null;
+  var count = 0;
+  while (app_nav.length > 0 && app_nav[app_nav.length-1].view === 'drawer') {
+    app_nav.pop();
+    count++;
+  }
+  if (count > 0) {
+    _appPopGuard = count;
+    history.go(-count);
+  }
+}
+function drawerBackOneLevel() {
+  if (app_nav.length > 0 && app_nav[app_nav.length-1].view === 'drawer') {
+    app_nav.pop();
+    _appPopGuard++;
+    try { history.back(); } catch(e) { _appPopGuard = Math.max(0, _appPopGuard - 1); }
+    restoreDrawerAfterPop();
+  } else {
+    closeDrawer();
+  }
+}
+function drawerPopFromBack() {
+  restoreDrawerAfterPop();
+}
+function restoreDrawerAfterPop() {
+  if (app_nav.length > 0 && app_nav[app_nav.length-1].view === 'drawer') {
+    var parentPath = app_nav[app_nav.length-1].path;
+    if (parentPath && parentPath.length >= 1) {
+      var node = {children: APP_STATE.categories};
+      for(var i=0;i<parentPath.length;i++){node=(node.children||node.chapters||[])[parentPath[i]]||null;if(!node)return;}
+      APP_STATE.selectedCategory = node;
+      renderDrawer(parentPath, false);
+      return;
+    }
+  }
+  closeDrawerUiOnly();
+}
+function openCategory(index){APP_STATE.selectedCategory = APP_STATE.categories[index]; renderDrawer();}
+function openChild(path){let node={children:APP_STATE.categories};for(var i=0;i<path.length;i++){node=(node.children||node.chapters||[])[path[i]]||null;if(!node)return;}APP_STATE.selectedCategory=node;renderDrawer(path);}
+function openPracticeFromApp(categoryId, siblingsJson, currentIdx){
+  if(!categoryId) return;
+  const mask = document.querySelector('.drawer-mask');
+  if(mask) mask.remove();
+  cleanupDrawerUi();
+  APP_STATE.selectedCategory = null;
+  var payload = {categoryId:String(categoryId)};
+  if(siblingsJson && currentIdx !== undefined) {
+    try { payload.siblings = JSON.parse(siblingsJson); } catch(e) { payload.siblings = siblingsJson; }
+    payload.siblingIdx = currentIdx;
+  }
+  const data = b64EncodeUtf8(JSON.stringify(payload));
+  const target = 'file:///android_asset/practice_frontend.html#data=' + data;
+  if(!siblingsJson || currentIdx === undefined){
+    const before = location.href;
+    const started = callAndroid('openPractice', categoryId);
+    if(started) {
+      setTimeout(function(){
+        if (location.href === before) location.href = target;
+      }, 300);
+      return;
+    }
+  }
+  location.href = target;
+}
+function renderDrawer(path, pushState){
+ const c = APP_STATE.selectedCategory; if(!c) return;
+ document.body.classList.add('drawer-open');
+ setNativePullRefreshEnabled(false);
+ const children=c.children||c.chapters||[];
+ const old = document.querySelector('.drawer-mask'); if(old) old.remove();
+ const div = document.createElement('div');
+ div.className='drawer-mask';
+ div.onclick = function(e){ if(e.target === div){ closeDrawer(); } };
+ const base=path||[APP_STATE.categories.indexOf(c)];
+ if (pushState !== false) pushAppNav({view:'drawer', path: base||[]});
+  div.innerHTML = '<div class="drawer"><div class="drawer-handle"></div>'
+    + '<div class="drawer-topbar">'
+    + '<button class="drawer-back-btn" onclick="event.stopPropagation();drawerBackOneLevel()">←</button>'
+    + '<div class="drawer-topbar-title">'+esc(c.name)+'</div>'
+    + '<button class="drawer-home-btn" onclick="event.stopPropagation();callAndroid(\'goHome\')">⌂</button>'
+    + '</div>'
+    + '<div class="drawer-sub">'+esc(categoryMeta(c))+'</div><div class="chapter-list">'
+    + (children.length?children.map(function(ch,i){
+        var sid = ch.id || '';
+        var sibJson = esc(JSON.stringify(children.map(function(s){return {id:String(s.id),name:s.name}}))).replace(/"/g,'\u0026quot;');
+        return '<div class="chapter-card" data-id="'+sid+'" data-siblings="'+sibJson+'" data-idx="'+i+'" onclick="'+(ch.children&&ch.children.length?'openChild(['+(base||[]).concat([i]).join(',')+'])':'var d=this.dataset;openPracticeFromApp(d.id,d.siblings,parseInt(d.idx))')+'"><div class="chapter-main"><div><div class="chapter-name">'+esc(ch.name)+'</div><div class="chapter-count">'+esc(categoryMeta(ch))+'</div></div><div class="arrow">›</div></div></div>';
+      }).join(''):'<div class="chapter-card" onclick="openPracticeFromApp(\''+esc(c.id)+'\')"><div class="chapter-main"><div><div class="chapter-name">开始学习</div><div class="chapter-count">'+esc(c.questionCount||c.totalQuestionCount||'章节题目')+'</div></div><div class="arrow">›</div></div></div>')
+    + '</div></div>';
+  document.body.appendChild(div);
+}
+
+// ==================== 收藏页 ====================
+// KaTeX 渲染配置（合并两个文件的配置）
+const KO={delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false,strict:false,errorColor:'#ef4444'};
+
+function loadFavoritesData(){
+  document.getElementById('app').innerHTML='<div class="page favorites-enter">'+topbar('收藏题目','正在读取本地收藏')+'<div class="loading"><div class="loading-spinner"></div><p>加载收藏中...</p></div>'+tabbar()+'</div>';
+  setNativePullRefreshEnabled(false);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+  if (window.Android && typeof window.Android.getFavoritesData === 'function') {
+    try {
+      FAVORITES_DATA = JSON.parse(window.Android.getFavoritesData());
+      try{localStorage.setItem('fav_cache',JSON.stringify(FAVORITES_DATA));}catch(e){}
+    } catch (e) {
+      FAVORITES_DATA = [];
+    }
+  } else {
+    try{
+      var cached = localStorage.getItem('fav_cache');
+      if(cached) { FAVORITES_DATA = JSON.parse(cached); }
+    }catch(e){}
+  }
+  render();
+  // 触发静默同步
+  if(window.Android&&window.Android.syncFavorites){
+    setTimeout(function(){
+      window.Android.syncFavorites();
+      var ss=document.getElementById('syncStatus');
+      if(ss){ss.textContent='同步中…';setTimeout(function(){if(ss)ss.textContent=''},8000)}
+    },500);
+  }
+  });});
+}
+
+// 收藏分类与卡片辅助函数
+function catKey(c){
+  return {'收藏':'收藏','不熟练':'不熟练','完全不会':'完全不会','掌握':'掌握','all':'全部'}[c]||'收藏';
+}
+function catName(c){
+  return {'all':'全部','收藏':'收藏','不熟练':'不熟练','完全不会':'完全不会','掌握':'已掌握'}[c]||c;
+}
+function favCardPreview(q, idx){
+  var stem = q.stemHTML || q.stemPreview || '无题目内容';
+  var opts = q.optionsHTML || '';
+  return '<div class="card-preview" data-full="'+idx+'">'+stem+opts+'</div>';
+}
+function favItemKey(q, idx){
+  return String(q && (q.id || q.question_id || q.questionId || q.questionNo || q.questionNumber) || idx);
+}
+function favCardHash(q){
+  var s = String((q&&(q.category||''))+'|'+(q&&(q.source||''))+'|'+(q&&(q.questionNumber||''))+'|'+(q&&(q.stemHTML||q.stemPreview||''))+'|'+(q&&(q.optionsHTML||'')));
+  var h=0;
+  for(var i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;
+  return String(h);
+}
+function buildFavCardHtml(q, idx){
+  var ck=catKey(q.category);
+  return '<div class="fav-card" data-fav-id="'+esc(favItemKey(q,idx))+'" data-fav-hash="'+esc(favCardHash(q))+'" data-path="'+(q.categoryPath?esc(q.categoryPath):'')+'" style="--i:'+idx+';" onclick="showFavDetail('+idx+')">'
+    +'<div class="card-bar cat-'+ck+'"></div>'
+    +'<div class="card-head">'
+    +  '<span class="card-tag cat-'+ck+'">'+catName(q.category)+'</span>'
+    +  '<span class="card-src">'+esc(q.source)+' · #'+(q.questionNumber||'')+'</span>'
+    +'</div>'
+    +favCardPreview(q,idx)
+    +'</div>';
+}
+function createFavCardElement(q, idx){
+  var wrap=document.createElement('div');
+  wrap.innerHTML=buildFavCardHtml(q,idx);
+  return wrap.firstElementChild;
+}
+
+// 分类筛选
+function getAllPaths(){
+  var paths={};
+  FAVORITES_DATA.forEach(function(q){if(q.categoryPath)paths[q.categoryPath]=true});
+  return Object.keys(paths).sort();
+}
+function getFilteredFavorites(){
+  var all=FAVORITES_DATA;
+  if(selectedFavPaths.length>0){
+    all=all.filter(function(q){return q.categoryPath&&selectedFavPaths.indexOf(q.categoryPath)>=0});
+  }
+  return all;
+}
+function togglePath(path){
+  var idx=selectedFavPaths.indexOf(path);
+  if(idx>=0)selectedFavPaths.splice(idx,1);
+  else selectedFavPaths.push(path);
+  if(refreshListTimer)clearTimeout(refreshListTimer);
+  refreshListTimer=setTimeout(refreshFavListView,150);
+}
+function selectAllPaths(){
+  selectedFavPaths=[];
+  if(refreshListTimer)clearTimeout(refreshListTimer);
+  refreshListTimer=setTimeout(refreshFavListView,150);
+}
+function filterLabel(){
+  if(selectedFavPaths.length===0)return '全部收藏';
+  return '已选 '+selectedFavPaths.length+' 个分类';
+}
+function isPathSelected(path){
+  return selectedFavPaths.indexOf(path)>=0;
+}
+function showFilterDrawer(){
+  if(app_nav.length>0 && app_nav[app_nav.length-1].view==='favFilter')return;
+  pushAppNav({view:'favFilter'});
+  renderFilterDrawer();
+}
+function renderFilterDrawer(){
+  var paths=getAllPaths();
+  var btnsHtml='<button class="filter-item'+(selectedFavPaths.length===0?' active':'')+'" data-path="__all__"><span class="filter-check">'+(selectedFavPaths.length===0?'✓':'')+'</span>全部收藏</button>';
+  paths.forEach(function(p){
+    var sel=isPathSelected(p);
+    btnsHtml+='<button class="filter-item'+(sel?' active':'')+'" data-path="'+p.replace(/&/g,'&amp;').replace(/"/g,'"')+'"><span class="filter-check">'+(sel?'✓':'')+'</span>'+esc(p)+'</button>';
+  });
+  var old=document.getElementById('filterDrawer');
+  if(old){
+    var flist=old.querySelector('.filter-list');
+    if(flist)flist.innerHTML=btnsHtml;
+    return;
+  }
+  var fullHtml='<div class="drawer-mask" onclick="if(event.target===this)closeFilterDrawer()"><div class="drawer">'
+    +'<div class="drawer-handle"></div>'
+    +'<div class="drawer-title">题目分类</div>'
+    +'<div class="drawer-sub">可多选，点选即生效</div>'
+    +'<div class="filter-list">'+btnsHtml+'</div></div></div>';
+  var div=document.createElement('div');
+  div.id='filterDrawer';
+  div.innerHTML=fullHtml;
+  div.addEventListener('click',function(e){
+    var item=e.target.closest('.filter-item');
+    if(!item)return;
+    var path=item.dataset.path;
+    if(path==='__all__'){selectAllPaths();closeFilterDrawer();}
+    else{togglePath(path);renderFilterDrawer();}
+  });
+  document.body.appendChild(div);
+}
+function closeFilterDrawer(){
+  var el=document.getElementById('filterDrawer');
+  if(!el)return;
+  el.remove();
+  var count=0;
+  while(app_nav.length>0 && app_nav[app_nav.length-1].view==='favFilter'){
+    app_nav.pop();count++;
+  }
+  if(count>0){_appPopGuard=count;history.go(-count);}
+}
+function closeFilterDrawerUi(){
+  var el=document.getElementById('filterDrawer');
+  if(el)el.remove();
+}
+
+// KaTeX 渲染
+function renderMath(container){try{renderMathInElement(container,KO)}catch(e){}}
+function asyncRenderMathList(app){
+  if(renderMathTimer)clearTimeout(renderMathTimer);
+  var cards=app.querySelectorAll('.card-preview:not(.rendered)');
+  asyncRenderMathCards(cards);
+}
+function asyncRenderMathCards(cards){
+  if(renderMathTimer)clearTimeout(renderMathTimer);
+  if(cards.length===0)return;
+  var index=0;var firstChunk=true;
+  function processChunk(){
+    var chunkEnd=Math.min(index+(firstChunk?3:5),cards.length);
+    while(index<chunkEnd){
+      var card=cards[index];
+      try{renderMathInElement(card,KO)}catch(e){}
+      card.classList.add('rendered');
+      index++;
+    }
+    firstChunk=false;
+    if(index<cards.length){renderMathTimer=setTimeout(processChunk,32);}
+  }
+  processChunk();
+  setTimeout(function(){
+    for(var i=0;i<cards.length;i++)if(cards[i])cards[i].classList.add('rendered');
+  },900);
+}
+
+// 渲染收藏列表（嵌入 app 页面结构）
+function renderFavorites(){
+  isFavDetailView=false;
+  currentFavDetail=-1;
+  savedFavListHTML='';
+
+  var favCount=FAVORITES_DATA.length;
+  var cardsHtml='';
+  if(favCount===0){
+    cardsHtml='<div class="empty"><div class="empty-emoji">📭</div><div class="empty-title">暂无收藏题目</div><div class="empty-sub">收藏后会显示在这里</div></div>';
+  }else{
+    cardsHtml=FAVORITES_DATA.map(function(q,i){return buildFavCardHtml(q,i)}).join('');
+  }
+
+  var html='<div class="favorites-enter">'+topbar('收藏题目','共 '+favCount+' 题 · <span id="syncStatus">已缓存到本地</span>')
+    +'<div style="position:relative;overflow:hidden">'
+    +  '<div class="pull-refresh" id="pullRefresh"><span class="pr-spinner"></span><span class="pr-text" id="prText">↓ 下拉刷新</span></div>'
+    +  '<button class="filter-trigger" onclick="showFilterDrawer()">'+esc(filterLabel())+' <span class="arrow-down">▼</span></button>'
+    +  '<div class="list"></div>'
+    +'</div></div>';
+
+  setTimeout(function(){
+    var listEl=document.querySelector('.list');
+    if(listEl){
+      listEl.innerHTML=cardsHtml;
+      if(favCount>0){
+        requestAnimationFrame(function(){asyncRenderMathList(listEl)});
+      }
+    }
+    refreshFavListView();
+    initPullRefresh();
+  },120);
+
+  return html;
+}
+
+// 刷新列表视图
+function refreshFavListView(){
+  var trigger=document.querySelector('.filter-trigger');
+  if(trigger)trigger.innerHTML=esc(filterLabel())+' <span class="arrow-down">▼</span>';
+  var listEl=document.querySelector('.list');
+  if(listEl){
+    var cards=listEl.querySelectorAll('.fav-card');
+    var visibleCount=0;
+    for(var i=0;i<cards.length;i++){
+      var path=cards[i].getAttribute('data-path');
+      var isVisible=(selectedFavPaths.length===0)||(path&&selectedFavPaths.indexOf(path)>=0);
+      if(isVisible){
+        cards[i].style.display='';
+        cards[i].style.animation='none';
+        visibleCount++;
+      }else{
+        cards[i].style.display='none';
+      }
+    }
+    var emptyEl=listEl.querySelector('.empty.filtered-empty');
+    if(visibleCount===0&&FAVORITES_DATA.length>0){
+      if(!emptyEl){
+        var emptyDiv=document.createElement('div');
+        emptyDiv.className='empty filtered-empty';
+        emptyDiv.innerHTML='<div class="empty-emoji">📭</div><div class="empty-text">该分类下暂无题目</div>';
+        listEl.appendChild(emptyDiv);
+      }else{
+        emptyEl.style.display='';
+      }
+    }else if(emptyEl){
+      emptyEl.style.display='none';
+    }
+  }
+}
+
+function renderFavDetailMath(){
+  var app=document.getElementById('app');
+  if(!app)return;
+  var blocks=app.querySelectorAll('.block-content, .block-options, .content, .options');
+  for(var bi=0;bi<blocks.length;bi++){
+    try{renderMathInElement(blocks[bi],KO)}catch(e){}
+  }
+}
+
+// 收藏详情页
+function showFavDetail(idx){
+  var q=FAVORITES_DATA[idx];if(!q)return;
+  var app=document.getElementById('app');
+  var wasInDetail=isFavDetailView;
+
+  if(!wasInDetail){
+    savedFavListHTML=app.innerHTML;
+    pushAppNav({view:'favDetail',idx:idx});
+  }
+
+  currentFavDetail=idx;
+  isFavDetailView=true;
+  var ck=catKey(q.category);
+
+  // 构建或优化选项 HTML
+  if(!q.optionsHTML && Array.isArray(q.options) && q.options.length > 0){
+    var cStr = q.correctLabels || '';
+    var optsH = '<div class="options">';
+    for(var i=0; i<q.options.length; i++){
+      var v = q.options[i];
+      var lb = v.label || String.fromCharCode(65 + i);
+      var bd = v.content_md || v.content || v.text || '';
+      optsH += '<div class="option option-item" data-label="'+esc(lb)+'" data-correct="'+esc(cStr)+'" onclick="checkOpt(this)">'
+            + '<div class="olabel opt-label">'+esc(lb)+'</div>'
+            + '<div class="content opt-text">'+bd+'</div>'
+            + '</div>';
+    }
+    optsH += '</div>';
+    q.optionsHTML = optsH;
+  }
+
+  var optionsInBlock='';
+  if(q.optionsHTML){
+    optionsInBlock='<div class="block-options">'+q.optionsHTML+'</div>';
+  }
+  var answerHtml='';
+  if(q.answerHTML){
+    answerHtml='<button class="toggle" onclick="toggleBlock(this)">'
+      +'<span class="toggle-label">📖 查看答案</span><span class="arrow">▼</span>'
+      +'</button>'
+      +'<div class="collapsible"><div class="block">'
+      +  '<div class="block-title answer">✅ 答案</div>'
+      +  '<div class="block-content">'+q.answerHTML+'</div>'
+      +'</div></div>';
+  }
+  var solutionHtml='';
+  if(q.solutionHTML){
+    solutionHtml='<button class="toggle" onclick="toggleBlock(this)">'
+      +'<span class="toggle-label">💡 查看解析</span><span class="arrow">▼</span>'
+      +'</button>'
+      +'<div class="collapsible"><div class="block">'
+      +  '<div class="block-title solution">📋 解析</div>'
+      +  '<div class="block-content">'+q.solutionHTML+'</div>'
+      +'</div></div>';
+  }
+
+  app.style.opacity='1';
+  app.innerHTML='<div class="page page-card-enter">'
+    +topbar(q.source,'题目 #'+(q.questionNumber||idx+1)+' · '+catName(q.category),'goBackToFavList()')
+    +'<div class="detail-body">'
+    +  '<div class="detail-head">'
+    +    '<span class="detail-badge cat-'+ck+'">'+catName(q.category)+'</span>'
+    +    '<span class="detail-meta">'+esc(q.source)+'</span>'
+    +  '</div>'
+    +  '<div class="block">'
+    +    '<div class="block-title stem">📝 题目</div>'
+    +    '<div class="block-content">'+(q.stemHTML||'<p>无题目内容</p>')+'</div>'
+    +    optionsInBlock
+    +  '</div>'
+    +  answerHtml
+    +  solutionHtml
+    +  favActionsHtml(q)
+    +  (function(){
+        var filtered=getFilteredFavorites();
+        var fi=filtered.indexOf(q);
+        var prevBtn=fi>0?'<button class="fav-action" onclick="showPrev()">← 上一题</button>':'';
+        var nextBtn=fi<filtered.length-1?'<button class="fav-action" onclick="showNext()">下一题 →</button>':'';
+        return '<div class="nav-buttons">'+prevBtn+nextBtn+'</div>';
+      })()
+    +  '<button class="fav-action wide" onclick="goBackToFavList()" style="margin-top:16px;">返回列表</button>'
+    +'</div>';
+
+  renderFavDetailMath();
+  ub();
+
+  // 缺失答案/解析时从 API 拉取
+  if((!q.answerHTML||q.answerHTML.indexOf('<p></p>')>=0)&&(!q.solutionHTML||q.solutionHTML.length<5)&&q.id&&navigator.onLine){
+    var tk=APP_STATE.access_token||'';
+    if(!tk){try{tk=localStorage.getItem('daguan_token')||''}catch(e){}}
+    if(tk){
+      fetch('https://cxyonly.fans/api/questions/'+q.id,{headers:{'Authorization':'Bearer '+tk}})
+        .then(function(r){return r.json()})
+        .then(function(qd){
+          if(!qd||!qd.id)return;
+          var ans=qd.answer||{};
+          var refAns=ans.reference_answer_md||qd.correct_answer||'';
+          if(refAns){q.answerHTML='<p>'+refAns+'</p>';FAVORITES_DATA[idx]=q;try{localStorage.setItem('fav_cache',JSON.stringify(FAVORITES_DATA))}catch(e){}}
+          var expl=qd.answer_explanation||(qd.document?qd.document.explanation_md:'')||'';
+          if(expl){q.solutionHTML=expl;FAVORITES_DATA[idx]=q;try{localStorage.setItem('fav_cache',JSON.stringify(FAVORITES_DATA))}catch(e){}}
+          if(refAns||expl)showFavDetail(idx);
+        })
+        .catch(function(){});
+    }
+  }
+}
+
+// 从详情返回列表
+function goBackToFavList(){
+  if(savedFavListHTML){
+    document.getElementById('app').innerHTML=savedFavListHTML;
+    savedFavListHTML='';
+    isFavDetailView=false;
+    currentFavDetail=-1;
+    refreshFavListView();
+    setTimeout(initPullRefresh,250);
+  }else{
+    render();
+  }
+  var count=0;
+  while(app_nav.length>0&&app_nav[app_nav.length-1].view==='favDetail'){
+    app_nav.pop();count++;
+  }
+  if(count>0){_appPopGuard=count;history.go(-count);}
+}
+
+// 收藏页导航
+function showPrev(){
+  var filtered=getFilteredFavorites();
+  var cur=FAVORITES_DATA[currentFavDetail];
+  var fi=filtered.indexOf(cur);
+  if(fi>0)showFavDetail(FAVORITES_DATA.indexOf(filtered[fi-1]));
+}
+function showNext(){
+  var filtered=getFilteredFavorites();
+  var cur=FAVORITES_DATA[currentFavDetail];
+  var fi=filtered.indexOf(cur);
+  if(fi<filtered.length-1)showFavDetail(FAVORITES_DATA.indexOf(filtered[fi+1]));
+}
+
+// 选项交互
+function checkFavOption(el){
+  var cStr=el.getAttribute('data-correct')||'';
+  var q=FAVORITES_DATA[currentFavDetail];
+  if(!cStr && q){
+    if(q.correctLabels){
+      cStr=q.correctLabels;
+    }else if(q.answer&&q.answer.option_ids&&q.options){
+      var cLabs=[];
+      for(var j=0;j<q.answer.option_ids.length;j++){
+        for(var k=0;k<q.options.length;k++){
+          if(q.options[k].id===q.answer.option_ids[j])cLabs.push(q.options[k].label||String.fromCharCode(65+k));
+        }
+      }
+      cStr=cLabs.join(',');
+    }else if(q.correct_answer){
+      cStr=q.correct_answer;
+    }
+  }
+  if(!cStr)return;
+
+  var correctArr=cStr.split(',').map(function(s){return s.trim()});
+  var label=el.getAttribute('data-label');
+  var block=el.parentElement;
+  var allOptions=block.querySelectorAll('.option, .option-item');
+  allOptions.forEach(function(o){o.classList.remove('wrong','correct')});
+  if(correctArr.indexOf(label)>=0){el.classList.add('correct')}
+  else{el.classList.add('wrong')}
+  allOptions.forEach(function(o){
+    if(correctArr.indexOf(o.getAttribute('data-label'))>=0){o.classList.add('correct');}
+  });
+}
+window.checkOption = checkFavOption;
+window.checkOpt = checkFavOption;
+
+// 更新列表（Android 同步回调后）
+function updateFavListInPlace(data){
+  var subEl=document.querySelector('.topbar .sub');
+  if(subEl)subEl.innerHTML='共 '+data.length+' 题 · <span id="syncStatus">已同步</span>';
+  var listEl=document.querySelector('.list');
+  if(!listEl){render();return;}
+  if(data.length===0){
+    listEl.innerHTML='<div class="empty"><div class="empty-emoji">📭</div><div class="empty-title">暂无收藏题目</div><div class="empty-sub">收藏后会显示在这里</div></div>';
+    return;
+  }
+  var existing={};
+  var oldCards=listEl.querySelectorAll('.fav-card');
+  for(var i=0;i<oldCards.length;i++){
+    var key=oldCards[i].getAttribute('data-fav-id');
+    if(key)existing[key]=oldCards[i];
+  }
+  var filteredEmpty=listEl.querySelector('.empty.filtered-empty');
+  if(filteredEmpty)filteredEmpty.remove();
+  var empty=listEl.querySelector('.empty:not(.filtered-empty)');
+  if(empty)empty.remove();
+  var seen={};
+  var newPreviewCards=[];
+  for(var j=0;j<data.length;j++){
+    var item=data[j];
+    var itemKey=favItemKey(item,j);
+    var card=existing[itemKey];
+    seen[itemKey]=true;
+    if(card){
+      if(card.getAttribute('data-fav-hash')!==favCardHash(item)){
+        var newCard=createFavCardElement(item,j);
+        card.replaceWith(newCard);
+        card=newCard;
+        newPreviewCards.push(card.querySelector('.card-preview'));
+      }else{
+        card.style.setProperty('--i',j);
+        card.setAttribute('data-fav-hash',favCardHash(item));
+        card.setAttribute('data-path',item.categoryPath?item.categoryPath:'');
+        card.setAttribute('onclick','showFavDetail('+j+')');
+        var srcEl=card.querySelector('.card-src');
+        if(srcEl)srcEl.textContent=(item.source||'')+' · #'+(item.questionNumber||'');
+        var tagEl=card.querySelector('.card-tag');
+        if(tagEl){tagEl.className='card-tag cat-'+catKey(item.category);tagEl.textContent=catName(item.category);}
+        var barEl=card.querySelector('.card-bar');
+        if(barEl)barEl.className='card-bar cat-'+catKey(item.category);
+        var previewEl=card.querySelector('.card-preview');
+        if(previewEl)previewEl.setAttribute('data-full',j);
+      }
+    }else{
+      card=createFavCardElement(item,j);
+      newPreviewCards.push(card.querySelector('.card-preview'));
+    }
+    var currentAtIndex=listEl.children[j];
+    if(card!==currentAtIndex)listEl.insertBefore(card,currentAtIndex||null);
+  }
+  oldCards=listEl.querySelectorAll('.fav-card');
+  for(var k=0;k<oldCards.length;k++){
+    var oldKey=oldCards[k].getAttribute('data-fav-id');
+    if(oldKey&&!seen[oldKey])oldCards[k].remove();
+  }
+  refreshFavListView();
+  if(newPreviewCards.length>0){
+    setTimeout(function(){asyncRenderMathCards(newPreviewCards.filter(function(n){return!!n}))},40);
+  }
+}
+
+// 折叠/展开
+function toggleBlock(btn){
+  var wrap=btn.nextElementSibling;
+  if(!wrap)return;
+  var isOpen=wrap.classList.contains('open');
+  var label=btn.querySelector('.toggle-label');
+  var isAnswer=label.textContent.indexOf('答案')>=0;
+  if(isOpen){
+    wrap.style.maxHeight=wrap.scrollHeight+'px';
+    wrap.offsetHeight;
+    wrap.style.maxHeight='0';
+    wrap.classList.remove('open');
+    btn.classList.remove('open');
+    label.textContent=isAnswer?'📖 查看答案':'💡 查看解析';
+  }else{
+    wrap.classList.add('open');
+    btn.classList.add('open');
+    label.textContent=isAnswer?'✅ 收起答案':'📋 收起解析';
+    requestAnimationFrame(function(){
+      var targetHeight=wrap.scrollHeight;
+      wrap.style.maxHeight=targetHeight+'px';
+      var content=wrap.querySelector('.block-content');
+      if(content){
+        content.style.opacity='0';
+        renderMath(content);
+        setTimeout(function(){content.style.opacity='1'},100);
+      }
+      setTimeout(function(){wrap.style.maxHeight='none'},450);
+    });
+  }
+}
+
+// ===== 收藏详情交互按钮 =====
+function toast(m){var old=document.querySelector('.toast');if(old)old.remove();var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove()},1200)}
+function cq(){return FAVORITES_DATA[currentFavDetail]||{}}
+function qi(q){return q.id||q.question_id||''}
+function isFav(q){return!!(q.rawFavoritedAt)}
+function mast(q){return q.rawMastery||''}
+function gNote(q){return q.note||''}
+function hasNote(q){return!!gNote(q)}
+function ub(){
+  var q=cq();if(!q)return;
+  document.querySelectorAll('.fav-action').forEach(function(b){
+    var a=b.getAttribute('data-a');if(!a)return;
+    if(a=='fav'){b.classList.toggle('on',isFav(q));b.textContent=isFav(q)?'✓已收藏':'☆收藏'}
+    else if(a=='mastered'||a=='familiar'||a=='unknown'){
+      var m=mast(q);
+      var matched=(a=='mastered'&&m=='mastered')||(a=='familiar'&&m=='needs_practice')||(a=='unknown'&&m=='not_known');
+      b.classList.toggle('on',matched);
+      var t=a=='mastered'?'掌握':a=='familiar'?'不熟练':'不会';
+      b.textContent=(matched?'✓ ':'')+t}
+    b.disabled=false;
+  });
+  var nb=document.getElementById('favNoteBtn');if(nb)nb.textContent=hasNote(q)?'✏编辑笔记':'➕添加笔记'
+}
+window.onPracticeActionComplete=function(){ub()};
+window.onPracticeActionCompleteWithData=function(b64){
+  try{
+    var serverData = JSON.parse(b64d(b64));
+    var q = cq();
+    if(q && serverData && serverData.user_state){
+      if(serverData.user_state.mastery !== undefined) q.rawMastery = serverData.user_state.mastery;
+      if(serverData.user_state.favorited_at !== undefined) q.rawFavoritedAt = serverData.user_state.favorited_at || '';
+      if(serverData.user_state.note !== undefined) q.note = serverData.user_state.note;
+    }
+  }catch(e){}
+  ub();
+};
+function act(a){
+  var q=cq(),id=qi(q);
+  if(!id||!q)return;
+  document.querySelectorAll('.fav-action').forEach(function(b){b.disabled=true});
+  if(a=='fav'){
+    if(isFav(q)){q.rawFavoritedAt='';var idx=FAVORITES_DATA.indexOf(q);if(idx>=0)FAVORITES_DATA.splice(idx,1);callAndroid('practiceAction','fav_false|'+id);toast('已取消收藏');goBackToFavList();return}
+    else{toast('请先在练习页收藏');ub();return}
+  }else{
+    var m=mast(q);
+    var already=(a=='mastered'&&m=='mastered')||(a=='familiar'&&m=='needs_practice')||(a=='unknown'&&m=='not_known');
+    if(already){
+      q.rawMastery='not_started';
+      callAndroid('practiceAction','not_started|'+id);
+      toast('已取消'+(a=='mastered'?'掌握':a=='familiar'?'不熟练':'不会'))
+    }else{
+      var apiAction=a;
+      if(a=='familiar'){q.rawMastery='needs_practice';apiAction='needs_practice'}
+      else if(a=='unknown'){q.rawMastery='not_known';apiAction='not_known'}
+      else if(a=='mastered'){q.rawMastery='mastered';apiAction='mastered'}
+      toast('已标记'+(a=='mastered'?'掌握':a=='familiar'?'不熟练':'不会'));
+      callAndroid('practiceAction',apiAction+'|'+id)
+    }
+  }
+  setTimeout(function(){ub()},200)
+}
+function openNote(){
+ var q=cq(),id=qi(q);
+ if(!id||!q)return;
+ var existing=gNote(q);
+ var d=document.createElement('div');d.className='modal';
+ var bx=document.createElement('div');bx.className='modal-box';
+ bx.innerHTML='<h3>'+(existing?'编辑笔记':'添加笔记')+'</h3><textarea id="noteTextarea" maxlength="2000">'+esc(existing)+'</textarea><div class="char-count"><span id="noteCount">'+existing.length+'</span>/2000</div><button class="save-btn" id="noteSave">保存笔记</button><button class="fav-action wide" id="noteCancel" style="margin:8px 0 0">取消</button>';d.appendChild(bx);document.body.appendChild(d);
+ var ta=bx.querySelector('#noteTextarea');ta.focus();ta.selectionStart=ta.value.length;
+ ta.addEventListener('input',function(){document.getElementById('noteCount').textContent=ta.value.length});
+ bx.querySelector('#noteSave').addEventListener('click',function(){var txt=ta.value;q.note=txt;d.remove();ub();toast('笔记已保存');callAndroid('practiceAction','note|'+id+'|'+encodeURIComponent(txt));try{var fc=JSON.parse(localStorage.getItem('fav_cache')||'[]');for(var fi=0;fi<fc.length;fi++){if(fc[fi].id==id){fc[fi].note=txt;break}}localStorage.setItem('fav_cache',JSON.stringify(fc))}catch(e){}});
+ bx.querySelector('#noteCancel').addEventListener('click',function(){d.remove()})
+}
+function favActionsHtml(q){
+ return '<div class="fav-actions">'
+ + '<button class="fav-action primary" data-a="fav" onclick="act(\'fav\')">'+(isFav(q)?'✓已收藏':'☆收藏')+'</button>'
+ + '<button class="fav-action" data-a="mastered" onclick="act(\'mastered\')">掌握</button>'
+ + '<button class="fav-action" data-a="familiar" onclick="act(\'familiar\')">不熟练</button>'
+ + '<button class="fav-action" data-a="unknown" onclick="act(\'unknown\')">不会</button>'
+ + '<button class="fav-action wide" id="favNoteBtn" onclick="openNote()">'+(hasNote(q)?'✏编辑笔记':'➕添加笔记')+'</button>'
+ + '</div>';
+}
+
+// ===== 下拉刷新 =====
+function initPullRefresh(){
+  var listEl=document.querySelector('.list');
+  if(!listEl)return;
+  if(pullRefreshBoundEl===listEl)return;
+  pullRefreshBoundEl=listEl;
+  listEl.addEventListener('touchstart',function(e){
+    if(isFavDetailView||listEl.scrollTop>0)return;
+    pullState.startY=e.touches[0].pageY;
+    pullState.pulling=false;
+    pullState.moved=false;
+  },{passive:true});
+  listEl.addEventListener('touchmove',function(e){
+    if(isFavDetailView||pullState.startY===0)return;
+    var dy=e.touches[0].pageY-pullState.startY;
+    if(dy<=0)return;
+    if(listEl.scrollTop>0)return;
+    e.preventDefault();
+    pullState.moved=true;
+    var pr=document.getElementById('pullRefresh');
+    if(!pr)return;
+    var prText=document.getElementById('prText');
+    if(dy>=PULL_THRESHOLD){
+      pr.classList.add('can-release');
+      if(prText)prText.textContent='释放刷新';
+    }else{
+      pr.classList.remove('can-release');
+      if(prText)prText.textContent='↓ 下拉刷新';
+    }
+    var offset=Math.min(dy*0.4,40);
+    pr.style.transform='translateY('+(56+offset)+'px)';
+  },{passive:false});
+  listEl.addEventListener('touchend',function(e){
+    if(!pullState.moved||isFavDetailView)return;
+    var pr=document.getElementById('pullRefresh');
+    var prText=document.getElementById('prText');
+    if(pr){
+      pr.style.transform='';
+      pr.classList.remove('can-release');
+    }
+    var dy=e.changedTouches[0].pageY-pullState.startY;
+    if(dy>=PULL_THRESHOLD&&window.Android&&window.Android.syncFavorites){
+      if(prText)prText.textContent='刷新中…';
+      pr.classList.add('pulling');
+      var ss=document.getElementById('syncStatus');
+      if(ss)ss.textContent='同步中…';
+      window.Android.syncFavorites();
+      setTimeout(function(){
+        pr.classList.remove('pulling');
+        if(prText)prText.textContent='↓ 下拉刷新';
+      },5000);
+    }
+    pullState.startY=0;
+    pullState.pulling=false;
+    pullState.moved=false;
+  },{passive:true});
+}
+
+// ==================== 我的 ====================
+function renderMe(){
+  return topbar('我的','') + '<div class="content"><div class="panel"><div class="eyebrow">账户状态</div><div class="panel-title">已登录</div></div><div class="panel" onclick="callAndroid(\'checkUpdate\')"><div class="panel-title">检查更新</div><div class="panel-sub">检查并下载最新版本</div></div><div class="panel" onclick="callAndroid(\'logout\')"><div class="panel-title">退出登录</div><div class="panel-sub">清除当前账号登录状态</div></div></div>';
+}
+
+// ==================== 学习历史 ====================
+let HISTORY_DATA = {events:[], lastStudy:{}, loading:false};
+const ACTION_LABELS = {favorite_mark:'收藏了',favorite_unmark:'取消收藏',practice:'练习了',mastered_mark:'标记了掌握',needs_practice_mark:'标记为不熟练',needs_practice_unmark:'取消不熟练',not_known_mark:'标记为不会',mastered:'已掌握',familiar:'标记为不熟练',unknown:'标记为完全不会'};
+function fmtTime(iso){if(!iso)return '';const d=new Date(iso);return (d.getMonth()+1)+'-'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+let PREVIEW_CACHE={};
+function truncateStem(s,max){
+  if(!s)return'';
+  var parts=s.split(/(\$\$[\s\S]+?\$\$|\$.+?\$)/g);
+  var out='';
+  for(var i=0;i<parts.length;i++){
+    var p=parts[i];
+    if((p.startsWith('$')||p.startsWith('$$'))&&(p.endsWith('$')||p.endsWith('$$'))){
+      if(out.length<max && out.length + p.length < max*1.5) out+=p;
+      else break;
+    }else{
+      var need=max-out.length;
+      if(need<=0)break;
+      if(p.length<=need){out+=p;}
+      else{
+        var cut=p.substring(0,need);
+        var idx=Math.max(cut.lastIndexOf('，'),cut.lastIndexOf('。'),cut.lastIndexOf('；'),cut.lastIndexOf('、'),cut.lastIndexOf(' '));
+        if(idx>need*0.3)out+=cut.substring(0,idx+1);
+        else out+=cut;
+        out+='…';
+        break;
+      }
+    }
+  }
+  return out;
+}
+function previewHtml(cached, qid){
+  if(!cached||!cached.stem)return '题目 #'+qid;
+  return cached.fullContent || cached.stem;
+}
+function fetchPreviews(events){
+var ids={},tk=APP_STATE.access_token||'',hd=tk?{'Authorization':'Bearer '+tk}:{};
+events.forEach(function(e){if(e.question_id&&!PREVIEW_CACHE[e.question_id])ids[e.question_id]=true});
+var keys=Object.keys(ids);
+if(!keys.length)return;
+keys.forEach(function(qid){
+  fetch('https://cxyonly.fans/api/questions/'+qid,{headers:hd})
+  .then(function(r){if(!r.ok)throw Error('http');return r.json()})
+  .then(function(d){
+    if(!d)return;
+    var st=d.stem||d.stem_md||(d.document&&d.document.stem_md)||(d.document&&d.document.content_md)||'';
+    if(!st)return;
+    var optsHtml='';
+    if(d.options&&d.options.length){
+      optsHtml='<div class="preview-options">';
+      for(var oi=0;oi<d.options.length;oi++){
+        var opt=d.options[oi];
+        optsHtml+='<div class="preview-option"><span class="olabel">'+(opt.label||String.fromCharCode(65+oi))+'</span><span class="ocontent">'+(opt.content_md||opt.content||opt.text||'')+'</span></div>';
+      }
+      optsHtml+='</div>';
+    }
+    var fullContent=st+optsHtml;
+    PREVIEW_CACHE[qid]={stem:st,optionsHtml:optsHtml,fullContent:fullContent,categoryIds:d.category_ids||(d.document&&d.document.category_ids)||[]};
+    Promise.resolve().then(function(){
+      var els=document.querySelectorAll('[data-qid="'+qid+'"]');
+      for(var j=0;j<els.length;j++){
+        els[j].innerHTML = previewHtml(PREVIEW_CACHE[qid], qid);
+      }
+      requestAnimationFrame(function(){
+        for(var j=0;j<els.length;j++){
+          try{renderMathInElement(els[j],KO);}catch(e){}
+          els[j].classList.add('rendered');
+        }
+      });
+    });
+  }).catch(function(){});
+});
+}
+function goToQuestion(catId, qId){
+  if(!qId)return;
+  if(!catId || catId==='null' || catId===''){
+    var cached = PREVIEW_CACHE[qId];
+    if(cached && cached.categoryIds && cached.categoryIds.length){
+      catId = String(cached.categoryIds[0]);
+    }else{
+      var tk=APP_STATE.access_token||'';
+      var hd=tk?{'Authorization':'Bearer '+tk}:{};
+      fetch('https://cxyonly.fans/api/questions/'+qId,{headers:hd}).then(function(r){return r.json()}).then(function(d){
+        if(d && d.category_ids && d.category_ids.length){
+          goToQuestion(String(d.category_ids[0]), qId);
+        }else{
+          goToQuestion('', qId);
+        }
+      }).catch(function(){
+        goToQuestion('', qId);
+      });
+      return;
+    }
+  }
+  if(window.Android&&window.Android.openPracticeWithQuestion){
+    window.Android.openPracticeWithQuestion(String(catId),qId?String(qId):'');
+  }else if(window.Android&&window.Android.openPractice){
+    window.Android.openPractice(String(catId));
+  }else{
+    const payload={categoryId:String(catId)};
+    if(qId)payload.questionId=String(qId);
+    const data=b64EncodeUtf8(JSON.stringify(payload));
+    location.href='file:///android_asset/practice_frontend.html#data='+data;
+  }
+}
+function rm(el){try{renderMathInElement(el||document.getElementById('app'),KO)}catch(e){}}
+function renderHistory(){
+  if (app_nav.length === 0 || app_nav[app_nav.length-1].view !== 'history') {
+    pushAppNav('history');
+  }
+  let html = '<div class="page">' + topbar('学习回看','最近学习记录','app_nav.pop();setTab(APP_STATE.prevTab||\'home\')') + '<div class="content">';
+  if(HISTORY_DATA.loading){
+    html += '<div class="empty"><div class="loading-spinner"></div><p>加载中…</p></div></div></div>';
+    document.getElementById('app').innerHTML = html;
+    return;
+  }
+  const ls = HISTORY_DATA.lastStudy;
+  if(ls && ls.has_record){
+    html += '<div class="panel"><div class="eyebrow">继续上次学习</div><div class="panel-title">'+esc(ls.category_name||'')+'</div><div class="panel-sub">上次学到: '+fmtTime(ls.updated_at)+'</div></div>';
+  }
+  html += '<div class="stats-grid"><div class="stat-card"><div class="stat-icon green">✓</div><div class="stat-label">今日掌握</div><div class="stat-value">'+(APP_STATE.todayCount||0)+'</div></div><div class="stat-card"><div class="stat-icon blue">↗</div><div class="stat-label">今日练习</div><div class="stat-value">'+(APP_STATE.todayPractice||0)+'</div></div></div>';
+  const events = HISTORY_DATA.events;
+  if(events.length){
+    html += '<div class="panel"><div class="panel-head"><div><div class="eyebrow">活动记录</div><div class="panel-title">最近 '+events.length+' 条</div></div></div></div><div class="category-list">';
+    events.forEach(function(e,i){
+      const action = ACTION_LABELS[e.action]||e.action;
+      const preview = PREVIEW_CACHE[e.question_id]||(e.question_id?'题目 #'+e.question_id:'未记录');
+      html += '<div class="chapter-card" style="--i:'+i+'" '+(e.question_id?'onclick="goToQuestion(\''+(e.category_id||'')+'\',\''+e.question_id+'\')"':'')+'><div class="chapter-main"><div><div class="chapter-name">'+esc(action)+'</div><div class="chapter-preview" data-qid="'+e.question_id+'">'+(PREVIEW_CACHE[e.question_id]?previewHtml(PREVIEW_CACHE[e.question_id], e.question_id):'题目 #'+e.question_id)+'</div><div class="chapter-count">'+fmtTime(e.created_at)+'</div></div><div class="chapter-arrow">→</div></div></div>';
+    });
+    html += '</div>';
+  } else {
+    html += '<div class="empty"><div class="empty-emoji">📖</div><div class="empty-title">暂无学习记录</div><div class="empty-sub">开始刷题后会显示在这里</div></div>';
+  }
+  html += '</div></div>';
+  var app=document.getElementById('app');
+  app.innerHTML = html + tabbar();
+  if(HISTORY_DATA.events.length){
+    var contentEl = app.querySelector('.content');
+    if(contentEl) setTimeout(function(){
+      try{
+        renderMathInElement(contentEl,KO);
+        contentEl.querySelectorAll('.chapter-preview').forEach(function(el){el.classList.add('rendered');});
+      }catch(e){}
+    }, 50);
+  }
+}
+function loadHistory(){
+if(HISTORY_DATA.loading) return;
+if(HISTORY_DATA.events && HISTORY_DATA.events.length){
+  renderHistory();
+  return;
+}
+HISTORY_DATA.loading = true;
+renderHistory();
+if(window.Android&&window.Android.requestHistoryData){
+  window.Android.requestHistoryData();
+}else{
+  var tk=APP_STATE.access_token||'';
+  var hd=tk?{'Authorization':'Bearer '+tk}:{};
+  Promise.all([
+    fetch('https://cxyonly.fans/api/user/practice_events/recent?per_page=50',{headers:hd}).then(function(r){return r.json()}).catch(function(){return {data:{items:[]}}}),
+    fetch('https://cxyonly.fans/api/questions/user/last_study',{headers:hd}).then(function(r){return r.json()}).catch(function(){return {}}),
+    fetch('https://cxyonly.fans/api/user/daily_stats',{headers:hd}).then(function(r){return r.json()}).catch(function(){return {}})
+  ]).then(function(results){
+    var eventsData = results[0] && results[0].data && results[0].data.items || [];
+    var ds = results[2] && results[2].data ? results[2].data : results[2] || {};
+    if(ds.today_mastered_count!=null)APP_STATE.todayCount=ds.today_mastered_count;
+    if(ds.today_practice_count!=null)APP_STATE.todayPractice=ds.today_practice_count;
+    HISTORY_DATA = {events:eventsData, lastStudy:results[1]||{}, loading:false};
+    renderHistory();fetchPreviews(HISTORY_DATA.events);
+  });
+}
+}
+
+// ==================== 首页数据更新 ====================
+function updateHomeData(raw){
+  var vs=document.querySelectorAll('.stat-value');
+  if(vs.length>=4&&APP_STATE.tab==='home'&&document.querySelector('.stats-grid')){
+    var vals=[APP_STATE.totalCount,APP_STATE.masteredCount,APP_STATE.favoritesCount,APP_STATE.todayCount];
+    for(var vi=0;vi<4;vi++){
+      var old=vs[vi].textContent;
+      var nu=String(vals[vi]);
+      if(old!==nu){
+        vs[vi].style.transition='opacity .2s ease,transform .2s ease';
+        vs[vi].style.opacity='0.3';
+        vs[vi].style.transform='scale(.92)';
+        (function(el,nv){
+          setTimeout(function(){
+            el.textContent=nv;
+            el.style.opacity='';
+            el.style.transform='';
+          },150);
+        })(vs[vi],nu);
+      }
+    }
+  }
+  var rp=document.getElementById('resumePanel');
+  if(rp){
+    var ls=APP_STATE.lastStudy;
+    if(ls&&ls.has_record){
+      rp.innerHTML='<div class="eyebrow">继续上次学习</div><div class="panel-title">'+esc(ls.category_name||'')+'</div><div class="panel-sub">'+fmtTime(ls.updated_at)+'</div>';
+    }
+  }
+}
+
+// ==================== 主渲染函数 ====================
+function render(){
+  // 清理所有浮层
+  var overlays=document.querySelectorAll('.drawer-mask');
+  overlays.forEach(function(el){el.remove()});
+  var fd=document.getElementById('filterDrawer');
+  if(fd)fd.remove();
+  document.body.classList.remove('drawer-open');
+
+  if(APP_STATE.tab !== 'library' || !APP_STATE.selectedCategory) cleanupDrawerUi();
+  setNativePullRefreshEnabled(APP_STATE.tab==='home');
+  let html = '<div class="page">';
+  if(APP_STATE.tab === 'library') html += renderLibrary();
+  else if(APP_STATE.tab === 'favorites') html += renderFavorites();
+  else if(APP_STATE.tab === 'me') html += renderMe();
+  else if(APP_STATE.tab === 'history') { document.getElementById('app').innerHTML=''; loadHistory(); return; }
+  else html += renderHome();
+  html += '</div>' + tabbar();
+  document.getElementById('app').innerHTML = html;
+}
+
+// ==================== 分类数据规范化 ====================
+function normalizeCategories(raw){
+const root=raw&&raw.categories?raw.categories:raw;
+const arr=(root&&root.data&&root.data.items)||root.data||root.items||root;
+if(!Array.isArray(arr))return null;
+function norm(c){
+const children=(c.children||c.subcategories||c.chapters||[]).map(norm).filter(x=>x.name);
+children.sort(function(a,b){var sa=a.sort_key||0,sb=b.sort_key||0;return sa!==sb?sa-sb:a.id-b.id});
+return {
+ id:c.id||c.category_id,
+ name:c.name||c.title||c.category_name||'未命名分类',
+ sort_key:c.sort_key||c.display_order||0,
+ questionCount:c.question_count||c.questions_count||c.count||0,
+ totalQuestionCount:c.total_question_count||c.totalQuestionCount||c.question_count||c.count||0,
+ children:children
+};
+}
+var result=arr.map(norm).filter(c=>c.name);
+result.sort(function(a,b){var sa=a.sort_key||0,sb=b.sort_key||0;return sa!==sb?sa-sb:a.id-b.id});
+return result;
+}
+
+// ==================== Android 桥接回调 ====================
+window.onAppData=function(b64){
+try{
+const raw=JSON.parse(b64DecodeUtf8(b64));
+if(raw&&raw.success){
+const cats=normalizeCategories(raw.categories);
+if(cats&&cats.length){APP_STATE.categories=cats;}
+const home=raw.home&&raw.home.data?raw.home.data:raw.home;
+if(home){
+if(home.total_questions!=null)APP_STATE.totalCount=home.total_questions;else if(home.totalCount!=null)APP_STATE.totalCount=home.totalCount;
+if(home.mastered_count!=null)APP_STATE.masteredCount=home.mastered_count;else if(home.masteredCount!=null)APP_STATE.masteredCount=home.masteredCount;
+if(home.today_count!=null)APP_STATE.todayCount=home.today_count;else if(home.todayCount!=null)APP_STATE.todayCount=home.todayCount;
+}
+var ts = raw.total_stats && raw.total_stats.data ? raw.total_stats.data : raw.total_stats;
+if(ts){
+  if(ts.total_questions!=null)APP_STATE.totalCount=ts.total_questions;
+  if(ts.mastered_count!=null)APP_STATE.masteredCount=ts.mastered_count;
+}
+var ds = raw.daily_stats && raw.daily_stats.data ? raw.daily_stats.data : raw.daily_stats;
+if(ds){
+  if(ds.today_mastered_count!=null)APP_STATE.todayCount=ds.today_mastered_count;
+  if(ds.today_practice_count!=null)APP_STATE.todayPractice=ds.today_practice_count;
+}
+if(raw.access_token)APP_STATE.access_token=raw.access_token;
+if(raw.last_study&&raw.last_study.has_record)APP_STATE.lastStudy=raw.last_study;
+if(raw.favoritesCount!=null)APP_STATE.favoritesCount=raw.favoritesCount;
+if(APP_STATE.tab==='home'){updateHomeData(raw);}
+else if(APP_STATE.tab==='library' && cats && cats.length){render();}
+}
+}catch(e){}
+};
+
+window.onHistoryData=function(b64){
+try{
+var raw=JSON.parse(b64DecodeUtf8(b64));
+if(raw&&raw.success){
+  if(raw.access_token)APP_STATE.access_token=raw.access_token;
+  var eventsData = raw.events && raw.events.data && raw.events.data.items || raw.events && raw.events.items || [];
+  var ds = raw.daily_stats && raw.daily_stats.data ? raw.daily_stats.data : raw.daily_stats || {};
+  if(ds){
+    if(ds.today_mastered_count!=null)APP_STATE.todayCount=ds.today_mastered_count;
+    if(ds.today_practice_count!=null)APP_STATE.todayPractice=ds.today_practice_count;
+  }
+  var lastStudyData = raw.last_study || {};
+  HISTORY_DATA = {events:eventsData, lastStudy:lastStudyData, loading:false};
+  renderHistory();fetchPreviews(HISTORY_DATA.events);
+  }else{
+  HISTORY_DATA.loading = false;
+  renderHistory();
+  }
+  }catch(e){HISTORY_DATA.loading = false;renderHistory();}
+};
+
+// 收藏数据初始化（Android 调用）
+window.init = function(d) {
+  try { FAVORITES_DATA = JSON.parse(d); } catch(e) { FAVORITES_DATA = []; }
+  try{localStorage.setItem('fav_cache',JSON.stringify(FAVORITES_DATA));}catch(e){}
+  if(APP_STATE.tab === 'favorites') render();
+};
+
+// 收藏数据更新（Android 同步后回调）
+window.updateFavoritesData = function(){
+  try{
+    if (!window.Android || typeof window.Android.getFavoritesData !== 'function') return;
+    var data = JSON.parse(window.Android.getFavoritesData());
+    if(Array.isArray(data) && data.length >= 0){
+      if(JSON.stringify(data)===JSON.stringify(FAVORITES_DATA)) return;
+      var oldNotes = {};
+      FAVORITES_DATA.forEach(function(o){if(o.id&&o.note)oldNotes[o.id]=o.note});
+      data.forEach(function(item){if(item.id&&oldNotes[item.id])item.note=oldNotes[item.id]});
+      FAVORITES_DATA = data;
+      try{localStorage.setItem('fav_cache',JSON.stringify(data));}catch(e){}
+      if(APP_STATE.tab === 'favorites' && !isFavDetailView){
+        updateFavListInPlace(data);
+      }
+      if(isFavDetailView && currentFavDetail >= 0 && currentFavDetail < FAVORITES_DATA.length){
+        var oldId = FAVORITES_DATA[currentFavDetail] ? FAVORITES_DATA[currentFavDetail].id : null;
+        if(oldId){
+          for(var di=0; di<FAVORITES_DATA.length; di++){
+            if(FAVORITES_DATA[di].id === oldId){
+              showFavDetail(di);
+              break;
+            }
+          }
+        }
+      }
+    }
+  }catch(e){}
+};
+
+// ==================== 初始化 ====================
+decodeData();
+render();
+setTimeout(function(){callAndroid('requestAppData');},300);
+</script>
+</body>
+</html>
